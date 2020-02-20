@@ -15,14 +15,15 @@ class train_test_data():
 
     def calculate_Erms(self):
         design_matrices = []
-        design_matrix = np.ones(self.N).reshape(self.N, 1)
-        design_matrices.append(design_matrix)
-        for i in range(1, 10):
+        for i in range(0, 10):
             basis = np.array([])
             for j in self.X_:
                 basis = np.append(basis, j ** i)
-            design_matrix = np.append(
-                design_matrix, basis.reshape(self.N, 1), axis=1)
+            if i == 0:
+                design_matrix = np.array(basis).reshape(self.N, 1)
+            else:
+                design_matrix = np.append(
+                    design_matrix, basis.reshape(self.N, 1), axis=1)
             design_matrices.append(design_matrix)
 
         weights = []
