@@ -26,6 +26,7 @@ Y = np.array(df['Horsepower'])  # Target Matrx
 
 weight_matrix = (np.linalg.inv(np.transpose(X)@X)
                  )@np.transpose(X)@Y  # Closed Form Equation
+print(weight_matrix.shape)
 predict1 = X@weight_matrix  # Prediction
 plt.figure(figsize=(10.5, 5.6))
 plt.subplot(1, 2, 1)
