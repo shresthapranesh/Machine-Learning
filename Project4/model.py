@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.sparse import csr_matrix
+import matplotlib.pyplot as plt
 
 
 class LogisticRegression:
@@ -22,8 +23,15 @@ class LogisticRegression:
             raise Exception("Input is in Incorrect Format!!")
 
         self.weight = np.random.rand(n_features, len(np.unique(target)))
+        self.velocity = np.random.rand(n_features, len(np.unique(target)))
 
         t = self.dummy_gen(target)
+
+        print('\nStarting training with learning rate: {} for epochs: {} \n'.format(
+            self.lr, self.epochs))
+
+        loss_matrix = []
+        accuracy_matrix = []
 
         for i in range(self.epochs):
 
@@ -31,6 +39,8 @@ class LogisticRegression:
 
             # gradient descent with regularization
             gradient = 1/n_data*(X.T@(y-t)) + self.lamb/n_data * self.weight
+
+            #self.velocity = 0.9*self.velocity + (1-0.9)*gradient
             self.weight = self.weight - self.lr * gradient
 
             # cost function with regularization
@@ -41,6 +51,18 @@ class LogisticRegression:
             acc_train = self.accuracy_score(y_pred, target)
             print('loss_train: {}, acc_train: {}'.format(
                 round(loss, 3), round(acc_train, 3)))
+            loss_matrix.append(loss)
+            accuracy_matrix.append(acc_train)
+        plt.figure()
+        plt.plot(loss_matrix)
+        plt.xlabel('Iteration')
+        plt.ylabel('Loss')
+        plt.title('Loss')
+        plt.figure()
+        plt.plot(accuracy_matrix)
+        plt.xlabel('Iteration')
+        plt.ylabel('Train Accuracy')
+        plt.title('Training Accuracy')
         return self
 
     def softmax(self, x, weight):
