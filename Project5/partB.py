@@ -25,6 +25,7 @@ nn2.fit(X_train, t, epochs=5000)
 y_pred2 = nn2.predict(X_train)
 
 
+
 plt.figure(figsize=(12, 8))
 
 plt.subplot(221)
@@ -61,6 +62,3 @@ plt.ylabel('Mean Squared Loss')
 
 plt.show()
 
-
-if '__name__' != '__main__':
-    print('whats up?')

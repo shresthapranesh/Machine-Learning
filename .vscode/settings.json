@@ -1,3 +1,10 @@
 {
-    "python.pythonPath": "C:\\Users\\hp\\Anaconda3\\envs\\ml\\python.exe"
+    "python.pythonPath": "C:\\Users\\hp\\Anaconda3\\envs\\ml\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": false,
+    "python.autoComplete.extraPaths": [
+        "./Project6/",
+        "./Project4/",
+        "./Project5/"
+    ]
 }

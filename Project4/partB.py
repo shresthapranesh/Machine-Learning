@@ -27,7 +27,7 @@ def data_split(data):
 
 
 #filepath = 'E:/Texas Tech University/Spring 2020/ECE-4332/Data/processed image/'
-filepath = 'C:/Users/hp/Downloads/Output 2/'
+filepath = '../Data/processed image'
 # worm
 print('Loading worm images...')
 worm_images = np.array([io.imread(filepath+'/Worm/'+image, as_gray=True)
