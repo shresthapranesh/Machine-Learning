@@ -1,85 +1,51 @@
 from dense_layer import FullyConnected
 from conv_layer import Conv2D
 from maxpool import Maxpool2D
-from utils import create_dataset, onehot_encoder
+from model import Model
+from utils import create_dataset, onehot_encoder, accuracy_score
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 from skimage import io
-import idx2numpy
-from sklearn.metrics import accuracy_score
-
-learning_rate = 1e-1
-
-# Model
-conv = Conv2D(8, (3, 3), lr=learning_rate)
-pool = Maxpool2D(pool=(2, 2), stride=(2, 2))
-dense = FullyConnected(layers=[32, 10], lr=learning_rate)
 
 
-def forward(image):
-    out1 = conv.forward_pass(image)
-    out2 = pool.forward_pass(out1)
-    out3 = dense.forward_pass(out2)
-    return out3
+'''
+Input Dimensions 
+N = Batch, C = channel, H = Height , W = Width
+training data X = (N,C,H,W)
+K = No. of Classes, N = Batch
+training data Y = (K,N) (one hot encoded)
 
+Output Dimensions
+K = No. of Classes, N = Batch
+Y_pred = (K,N)
+'''
 
-def backprop(label):
-    gradient1 = dense.backprop(label)
-    gradient2 = pool.backprop(gradient1)
-    gradient3 = conv.backprop(gradient2)
+# Hyperparameters
+learning_rate = 1e-3
 
-
-def train(image, label):
-    output = forward(image)
-    backprop(label)
-    loss = -np.sum(label*np.log(output))*1/output.shape[1]
-    print('Loss: {}'.format(loss))
-
-
-train_data = np.load('train_data.npz')
-test_data = np.load('test_data.npz')
-
-X_train, y_train = train_data['X_train'], train_data['y_train']
-X_test, y_test = test_data['X_test'], test_data['y_test']
-
-
-# X_train = idx2numpy.convert_from_file('../Data/train-images.idx3-ubyte')
-# y_train = idx2numpy.convert_from_file('../Data/train-labels.idx1-ubyte')
-
-# X_test = idx2numpy.convert_from_file('../Data/t10k-images.idx3-ubyte')
-# y_test = idx2numpy.convert_from_file('../Data/t10k-labels.idx1-ubyte')
+X_train, y_train, X_test, y_test = create_dataset()
 
 
 X_train = X_train[:, np.newaxis, :, :]
 X_test = X_test[:, np.newaxis, :, :]
 
-y_train = onehot_encoder(y_train).T
-#y_test = onehot_encoder(y_test).T
+y_train = onehot_encoder(y_train)
 
-print(X_train.shape)
-print(y_train.shape)
-print(X_test.shape)
+X_train = X_train/255
+X_test = X_test/255
 
+# Model
+conv = Conv2D(8, (3, 3), lr=learning_rate)
+pool = Maxpool2D(pool=(2, 2), stride=(2, 2))
+dense = FullyConnected(layers=[32, 2], lr=learning_rate)
 
-# for i in range(3):
-#     train(X_train/255, y_train)
+layers = [conv, pool, dense]
 
-# temp = conv.forward_pass(X_test/255)
-# temp = pool.forward_pass(temp)
-# y_pred = dense.forward_pass(temp)
+model = Model(layers)
+model.fit(X_train, y_train, epochs=20, batch_size=32)
 
-# y_pred = np.argmax(y_pred, axis=0)
-# acc_score = accuracy_score(y_test, y_pred)
-# print('accuracy Score: {}'.format(acc_score))
+y_pred = model.predict(X_test)
 
-# plt.figure()
-# plt.imshow(image[0, :, :], cmap=plt.cm.gray)
-
-
-# plt.figure()
-# for i in range(8):
-#     plt.subplot(2, 4, i+1)
-#     plt.imshow(conv.filters[i, 0, :, :], cmap=plt.cm.gray)
-
-# plt.show()
+y_pred = np.argmax(y_pred, axis=0)
+acc_score = accuracy_score(y_test, y_pred)
+print(f'test_acc: {acc_score}')

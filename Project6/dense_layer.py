@@ -1,13 +1,7 @@
 import numpy as np
-import time
-# Part A
 
 
 class FullyConnected:
-    '''
-    Your regular dense layer
-    '''
-
     def __init__(self, layers, reg=1e-3, lr=0.3):
         self.layers = layers
         self.W = {}
@@ -21,6 +15,10 @@ class FullyConnected:
         self.lr = lr
         self.reg = reg
         self.build_check = False
+        self.m = {}
+        self.v = {}
+        self.itr = 0
+        self.beta1, self.beta2 = (0.9, 0.999)
 
     def build(self, x):
         self.layers.insert(0, x.shape[0])
@@ -33,6 +31,8 @@ class FullyConnected:
             self.W[i +
                    1] = rng.uniform(low=lowerlimit, high=upperlimit, size=(self.layers[i+1], self.layers[i]))
             self.B[i+1] = np.zeros((self.layers[i+1], 1))
+            self.m[i+1] = 0
+            self.v[i+1] = 0
         self.build_check = True
 
     def forward_pass(self, x):
@@ -54,6 +54,9 @@ class FullyConnected:
         return self.H[self.n_layers-1]
 
     def backprop(self, y):
+        mt = {}
+        vt = {}
+        self.itr += 1
         for k in range(self.n_layers-1, 0, -1):
             if k == self.n_layers-1:
                 self.dA[k] = self.H[k]-y
@@ -67,7 +70,15 @@ class FullyConnected:
             self.dB[k] += self.reg * self.B[k]
 
         for i in range(self.n_layers-1):
-            self.W[i+1] -= self.lr * self.dW[i+1]
+            self.m[i+1] = self.beta1 * self.m[i+1] + \
+                (1-self.beta1) * self.dW[i+1]
+            self.v[i+1] = self.beta2 * self.v[i+1] + \
+                (1-self.beta2) * np.square(self.dW[i+1])
+
+            mt[i+1] = self.m[i+1]/(1-self.beta1**self.itr)
+            vt[i+1] = self.v[i+1]/(1-self.beta2**self.itr)
+            self.W[i+1] -= self.lr * mt[i+1] / \
+                (np.sqrt(vt[i+1])+1e-7)
             self.B[i+1] -= self.lr * self.dB[i+1]
 
         return self.dH[0].reshape(self.d_input_shape)
